@@ -339,8 +339,8 @@ from typing import List
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 from rapidfuzz import fuzz, process
-from sentence_transformers import SentenceTransformer, util
-
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 try:
     import spacy
     NLP = spacy.load("en_core_web_sm")
@@ -353,7 +353,6 @@ except Exception:
 APP_DIR = Path(__file__).parent
 DATA_PATH = APP_DIR / "data.json"
 FEEDBACK_PATH = APP_DIR / "feedback.json"
-EMB_MODEL_NAME = "all-MiniLM-L6-v2"
 
 # ---------- Flask setup ----------
 app = Flask(__name__)
@@ -381,18 +380,18 @@ with open(FEEDBACK_PATH, "r") as f:
     FEEDBACK = json.load(f)
 
 # ---------- Embedding Model ----------
-print("Loading embedding model:", EMB_MODEL_NAME)
-EMB_MODEL = SentenceTransformer(EMB_MODEL_NAME)
-print("Embedding model loaded.")
+# ---------- TF-IDF Model ----------
+TFIDF = TfidfVectorizer()
 
-project_texts = []
-for p in PROJECTS:
-    parts = []
-    parts.extend(p.get("required_components", []))
-    parts.extend(p.get("optional_components", []))
-    parts.append(p.get("description", ""))
-    project_texts.append(" | ".join(parts))
-project_embeddings = EMB_MODEL.encode(project_texts, convert_to_tensor=True)
+PROJECT_TEXTS = [
+    " ".join(
+        p.get("required_components", []) +
+        p.get("optional_components", [])
+    ) + " " + p.get("description", "")
+    for p in PROJECTS
+]
+
+TFIDF_MATRIX = TFIDF.fit_transform(PROJECT_TEXTS)
 
 # ---------- Utilities ----------
 def fuzzy_match_component(user_input: str, known_components: List[str], threshold: int = 70):
@@ -482,18 +481,17 @@ def extract_components(user_text: str) -> List[str]:
 def find_projects(user_components_raw: List[str]):
     expanded = expand_components(user_components_raw)
     user_set = set(expanded)
-    user_text = " ".join(expanded)
-    user_emb = EMB_MODEL.encode(user_text, convert_to_tensor=True)
-    sims = util.cos_sim(user_emb, project_embeddings)
+    query_vec = TFIDF.transform([" ".join(expanded)])
+    scores = cosine_similarity(query_vec, TFIDF_MATRIX).flatten()
     results = []
     for idx, project in enumerate(PROJECTS):
         required = [r.lower() for r in project.get("required_components", [])]
         matched = set(required) & user_set
         logical_frac = len(matched) / max(1, len(required))
-        emb_score = float(sims[0, idx].item())
-        emb_score_norm = (emb_score + 1.0) / 2.0
-        alpha = 0.65
-        combined = alpha * logical_frac + (1 - alpha) * emb_score_norm
+        emb_score_norm = float(scores[idx])
+       
+        tfidf_score = float(scores[idx])
+        combined = alpha * logical_frac + (1 - alpha) * tfidf_score
 
         # Feedback boost
         likes = FEEDBACK.get(project["name"], {}).get("likes", 0)
