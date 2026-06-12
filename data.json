@@ -1,0 +1,127 @@
+{
+  "components": [
+    {"name": "Arduino", "description": "Microcontroller board for prototyping"},
+    {"name": "Raspberry Pi", "description": "Single-board computer for advanced projects"},
+    {"name": "LED", "description": "Light Emitting Diode for indicators"},
+    {"name": "Resistor", "description": "Current limiting component"},
+    {"name": "Capacitor", "description": "For energy storage and filtering"},
+    {"name": "Potentiometer", "description": "Variable resistor for input control"},
+    {"name": "Button", "description": "Push button for input"},
+    {"name": "Switch", "description": "On/off control for circuits"},
+    {"name": "Sensor", "description": "Generic sensor like temperature or motion"},
+    {"name": "Ultrasonic Sensor", "description": "For distance measurement"},
+    {"name": "Infrared Sensor", "description": "For obstacle detection or line following"},
+    {"name": "Temperature Sensor", "description": "For measuring temperature"},
+    {"name": "Humidity Sensor", "description": "Measures air humidity"},
+    {"name": "LDR", "description": "Light Dependent Resistor for detecting brightness"},
+    {"name": "Motor", "description": "DC motor for movement"},
+    {"name": "Servo Motor", "description": "For precise angular movement"},
+    {"name": "Stepper Motor", "description": "For precise rotational control"},
+    {"name": "Relay", "description": "Switch for controlling high-power devices"},
+    {"name": "Buzzer", "description": "For sound alerts"},
+    {"name": "LCD Display", "description": "Display for output"},
+    {"name": "OLED Display", "description": "High-contrast small display"},
+    {"name": "Seven Segment Display", "description": "Numerical display for output"},
+    {"name": "Battery", "description": "Power source for portable projects"},
+    {"name": "Power Adapter", "description": "Power supply for stable voltage"},
+    {"name": "Breadboard", "description": "Prototype board for circuit testing"},
+    {"name": "Jumper Wires", "description": "Wires for connecting components"},
+    {"name": "Joystick", "description": "Input device for navigation"},
+    {"name": "Bluetooth Module", "description": "For wireless communication"},
+    {"name": "WiFi Module", "description": "For internet connectivity"},
+    {"name": "GSM Module", "description": "For mobile network communication"},
+    {"name": "GPS Module", "description": "For location tracking"},
+    {"name": "RFID Module", "description": "For ID card or tag reading"},
+    {"name": "Microphone", "description": "For sound detection"},
+    {"name": "Speaker", "description": "For sound output"}
+  ],
+
+  "projects": [
+    {
+      "name": "Blinking LED",
+      "required_components": ["Arduino", "LED"],
+      "optional_components": ["Resistor", "Button"],
+      "description": "A basic project to make an LED blink on and off."
+    },
+    {
+      "name": "Traffic Light System",
+      "required_components": ["Arduino", "LED", "Resistor", "Button"],
+      "optional_components": ["Sensor", "Buzzer"],
+      "description": "Simulate a traffic light with LEDs and user input."
+    },
+    {
+      "name": "Robot Car",
+      "required_components": ["Raspberry Pi", "Motor", "Battery", "Ultrasonic Sensor"],
+      "optional_components": ["Servo Motor", "Joystick"],
+      "description": "Build a remote-controlled car with obstacle avoidance."
+    },
+    {
+      "name": "Smart Home Sensor",
+      "required_components": ["Raspberry Pi", "Sensor", "LCD Display"],
+      "optional_components": ["Button", "Buzzer"],
+      "description": "Monitor and display environmental data like temperature."
+    },
+    {
+      "name": "Automated Door Lock",
+      "required_components": ["Arduino", "Servo Motor", "Sensor"],
+      "optional_components": ["Potentiometer", "Relay"],
+      "description": "Create a door that opens with motion detection."
+    },
+    {
+      "name": "Sound Alarm System",
+      "required_components": ["Arduino", "Buzzer", "Sensor"],
+      "optional_components": ["LED", "Button"],
+      "description": "Set up an alarm that triggers on motion or input."
+    },
+    {
+      "name": "Home Automation System",
+      "required_components": ["Arduino", "Relay", "Bluetooth Module"],
+      "optional_components": ["WiFi Module", "Button"],
+      "description": "Control home appliances using a smartphone via Bluetooth."
+    },
+    {
+      "name": "Weather Station",
+      "required_components": ["Raspberry Pi", "Temperature Sensor", "Humidity Sensor", "LCD Display"],
+      "optional_components": ["WiFi Module", "Buzzer"],
+      "description": "Monitor weather conditions and display data on screen."
+    },
+    {
+      "name": "RFID Door Lock",
+      "required_components": ["Arduino", "RFID Module", "Servo Motor"],
+      "optional_components": ["Buzzer", "LCD Display"],
+      "description": "Unlock a door using RFID cards."
+    },
+    {
+      "name": "Bluetooth Controlled Robot",
+      "required_components": ["Arduino", "Bluetooth Module", "Motor", "Battery"],
+      "optional_components": ["Ultrasonic Sensor", "Servo Motor"],
+      "description": "Drive a robot using Bluetooth commands from your phone."
+    },
+    {
+      "name": "Voice Controlled Light",
+      "required_components": ["Raspberry Pi", "Microphone", "Relay", "LED"],
+      "optional_components": ["WiFi Module"],
+      "description": "Turn lights on or off using voice commands."
+    },
+    {
+      "name": "GPS Tracker",
+      "required_components": ["Arduino", "GPS Module", "GSM Module", "Battery"],
+      "optional_components": ["LCD Display"],
+      "description": "Track location and send coordinates via SMS."
+    }
+  ],
+
+  "component_relations": {
+    "motor": ["dc motor", "servo motor", "stepper motor"],
+    "sensor": ["temperature sensor", "humidity sensor", "motion sensor", "infrared sensor", "ultrasonic sensor"],
+    "display": ["lcd display", "oled display", "seven segment display"],
+    "buzzer": ["alarm", "speaker", "sound module"],
+    "button": ["switch", "push button"],
+    "raspberry pi": ["pi board", "raspi", "raspberry"],
+    "arduino": ["microcontroller", "uno", "nano"],
+    "wifi module": ["esp8266", "esp32"],
+    "bluetooth module": ["hc-05", "hc-06"],
+    "rfid module": ["rfid reader", "rfid tag"],
+    "gps module": ["gps sensor", "location tracker"]
+  }
+}

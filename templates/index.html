@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Component Chatbot</title>
+  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
+
+  <style>
+    :root {
+      --blue: #3b82f6;
+      --blue-dark: #1d4ed8;
+      --blue-light: #60a5fa;
+      --bg-main: linear-gradient(135deg, #0f172a, #1e293b);
+      --sidebar-bg: #1e293b;
+      --user-msg: #334155;
+      --bot-msg: #1e40af;
+      --text-light: #e2e8f0;
+      --border-light: #475569;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      height: 100vh;
+      margin: 0;
+      background: var(--bg-main);
+      color: var(--text-light);
+    }
+
+    .sidebar {
+      width: 30%;
+      background: var(--sidebar-bg);
+      padding: 20px;
+      border-right: 1px solid var(--border-light);
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+
+    .sidebar h2 {
+      margin: 0 0 12px 0;
+      font-size: 18px;
+      color: var(--blue-light);
+    }
+
+    .search-bar {
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      font-size: 14px;
+      background-color: #0f172a;
+      color: var(--text-light);
+    }
+
+    .components-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      max-height: 68vh;
+      overflow-y: auto;
+    }
+
+    /* Component chip */
+    .chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: #1e293b;
+      color: var(--text-light);
+      border: 1px solid var(--border-light);
+      cursor: pointer;
+      transition: background .12s, transform .06s, box-shadow .12s;
+      font-size: 13px;
+    }
+
+    .chip:hover {
+      transform: translateY(-1px);
+      background: #334155;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .chip input { display: none; }
+
+    .chip.selected {
+      background: var(--blue);
+      color: white;
+      border-color: var(--blue-dark);
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #0f172a;
+      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .message-bubble {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .user-message {
+      background: var(--user-msg);
+      align-self: flex-end;
+      color: #f1f5f9;
+    }
+
+    .bot-message {
+      background: var(--bot-msg);
+      align-self: flex-start;
+      color: #f8fafc;
+    }
+
+    .input-area {
+      display: flex;
+      padding: 12px;
+      border-top: 1px solid var(--border-light);
+      align-items: center;
+      background: #1e293b;
+    }
+
+    .input-area input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      margin-right: 8px;
+      font-size: 14px;
+      background-color: #0f172a;
+      color: var(--text-light);
+    }
+
+    button {
+      background-color: var(--blue);
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button:hover {
+      background-color: var(--blue-dark);
+      transform: translateY(-1px);
+    }
+
+    .muted {
+      color: #94a3b8;
+      font-size: 13px;
+    }
+
+    .center {
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sidebar">
+    <h2>Available Components</h2>
+
+    <div class="search-bar">
+      <input id="componentSearch" type="text" placeholder="Search components..." />
+    </div>
+
+    <div class="components-list" id="componentList">
+      {% for component in components %}
+        <label class="chip" data-name="{{ component.name }}">
+          <input type="checkbox" value="{{ component.name }}">
+          <span class="chip-label">{{ component.name }}</span>
+        </label>
+      {% endfor %}
+    </div>
+
+    <div style="margin-top:12px; text-align:center;">
+      <button id="send-selected">Send Selected Components</button>
+    </div>
+  </div>
+
+  <div class="chat-container">
+    <div class="messages" id="messages">
+      <div class="center muted">🤖 WELCOME!!!! — select components or type them below to get project suggestions.</div>
+    </div>
+
+    <div class="input-area">
+      <input id="messageInput" type="text" placeholder="Type components (e.g., Arduino, LED) or a question..." />
+      <button id="sendButton">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const socket = io();
+    const messages = document.getElementById('messages');
+    const input = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const sendSelected = document.getElementById('send-selected');
+    const searchInput = document.getElementById('componentSearch');
+    const componentList = document.getElementById('componentList');
+
+    function appendMessage(text, sender = 'bot') {
+      const wrapper = document.createElement('div');
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble ' + (sender === 'user' ? 'user-message' : 'bot-message');
+      bubble.innerHTML = `<strong>${sender === 'user' ? 'You' : 'Bot'}:</strong> ${escapeHtml(text).replace(/\n/g, '<br>')}`;
+      wrapper.style.display = 'flex';
+      wrapper.style.justifyContent = sender === 'user' ? 'flex-end' : 'flex-start';
+      wrapper.appendChild(bubble);
+      messages.appendChild(wrapper);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function escapeHtml(unsafe) {
+      if (typeof unsafe !== 'string') return unsafe;
+      return unsafe.replace(/[&<"'>]/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+
+    componentList.addEventListener('click', (e) => {
+      const label = e.target.closest('.chip');
+      if (!label) return;
+      const checkbox = label.querySelector('input[type="checkbox"]');
+      if (!checkbox) return;
+      checkbox.checked = !checkbox.checked;
+      label.classList.toggle('selected', checkbox.checked);
+    });
+
+    searchInput.addEventListener('input', () => {
+      const filter = searchInput.value.trim().toLowerCase();
+      const labels = componentList.querySelectorAll('.chip');
+      labels.forEach(label => {
+        const text = (label.dataset.name || '').toLowerCase();
+        label.style.display = text.includes(filter) ? '' : 'none';
+      });
+    });
+
+    sendSelected.addEventListener('click', () => {
+      const checked = [...componentList.querySelectorAll('input[type=checkbox]:checked')].map(cb => cb.value);
+      if (checked.length === 0) {
+        appendMessage("Please select some components first.", 'user');
+        return;
+      }
+      appendMessage(checked.join(', '), 'user');
+      socket.emit('send_message', { message: checked });
+    });
+
+    sendButton.addEventListener('click', () => {
+      const msg = input.value.trim();
+      if (!msg) return;
+      appendMessage(msg, 'user');
+      socket.emit('send_message', { message: msg });
+      input.value = '';
+    });
+
+    socket.on('receive_message', data => {
+      appendMessage(data.message, 'bot');
+    });
+  </script>
+</body>
+</html>
