@@ -214,8 +214,9 @@
   </div>
 
   <script>
-    const socket = io();
-    const messages = document.getElementById('messages');
+const socket = io('https://project-chatbot-ytie.onrender.com', {
+  transports: ['polling']
+});    const messages = document.getElementById('messages');
     const input = document.getElementById('messageInput');
     const sendButton = document.getElementById('sendButton');
     const sendSelected = document.getElementById('send-selected');
